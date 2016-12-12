@@ -2,16 +2,17 @@
 
 /*
 
-Advent of code 2016 Day 1 by Johan Sölve
+Advent of code 2016 Day 1 part 2 - by Johan Sölve
 
 */
 
 define location => type {
 
 	data 
-		public x=integer,
-		public y=integer,
-		private direction=integer
+		private x=integer,
+		private y=integer,
+		private direction=integer,
+		private trace=map
 
 	public move(movement::string) => {
 		local(turn=#movement->substring(1,1),
@@ -24,19 +25,31 @@ define location => type {
 		}
 		.direction<0 ? .direction+=360
 		.direction>=360 ? .direction-=360
-		if(.direction===0) => {
-			.y+=#steps
-		else(.direction===90)
-			.x+=#steps
-		else(.direction===180)
-			.y-=#steps
-		else(.direction===270)
-			.x-=#steps
+		loop(#steps) => {
+			.track
+			if(.direction===0) => {
+				.y+=1
+			else(.direction===90)
+				.x+=1
+			else(.direction===180)
+				.y-=1
+			else(.direction===270)
+				.x-=1
+			}
+			if(.wasVisited) => {
+				return
+			}
 		}
 	}
 	public blocksAway => {
 		local(blocksAway=.x->abs + .y->abs)
 		return #blocksAway
+	}
+	public wasVisited => {
+		return(.trace >> .x + ',' + .y)
+	}
+	public track => {
+		.trace->insert(.x + ',' + .y)
 	}
 }
 
@@ -49,8 +62,10 @@ local(input='R3, L5, R1, R2, L5, R2, R3, L2, L5, R5, L4, L3, R5, L1, R3, R4, R1,
 iterate(#input) => {
 	loop_value->trim;
 	#cityLocation->move(loop_value)
+	if(#cityLocation->wasVisited) => {
+ 		loop_abort
+	}
 }
-
-'Easter Bunny HQ is ' + #cityLocation->blocksAway + ' blocks away'
+'First location visited twice is ' + #cityLocation->blocksAway + ' blocks away'
 
 ]
